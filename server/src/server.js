@@ -22,13 +22,15 @@ connectToDatabase();
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
 app.use(express.urlencoded({ extended: true }));
+app.use(express.static(path.join(__dirname, 'public')));
 
 app.get('/', async (req, res) => {
     try {
         const database = client.db('test');
         const collection = database.collection('test');
         const lobs = await collection.distinct('LOB');
-        res.render('index', { data: [], lobs });
+        const names = await collection.distinct('NAME');
+        res.render('index', { data: [], lobs, names, selectedLob: null, selectedName: null });
     } catch (error) {
         console.error("Error fetching data:", error);
         res.status(500).send("Error fetching data");
@@ -37,12 +39,21 @@ app.get('/', async (req, res) => {
 
 app.post('/filter', async (req, res) => {
     try {
-        const selectedLob = req.body.lob;
+        const selectedLob = req.body.lob || null;
+        const selectedName = req.body.name || null;
         const database = client.db('test');
         const collection = database.collection('test');
-        const data = await collection.find({ LOB: selectedLob }).toArray();
+        const query = {};
+        if (selectedLob) {
+            query.LOB = selectedLob;
+        }
+        if (selectedName) {
+            query.NAME = selectedName;
+        }
+        const data = await collection.find(query).toArray();
         const lobs = await collection.distinct('LOB');
-        res.render('index', { data, lobs });
+        const names = selectedLob ? await collection.distinct('NAME', { LOB: selectedLob }) : [];
+        res.render('index', { data, lobs, names, selectedLob, selectedName });
     } catch (error) {
         console.error("Error fetching data:", error);
         res.status(500).send("Error fetching data");
@@ -50,5 +61,5 @@ app.post('/filter', async (req, res) => {
 });
 
 app.listen(port, () => {
-    console.log(`Server is running on http://localhost:${port}`);
+    console.log(`Lokalny serwer uruchomiony pod adresem: http://localhost:${port}`);
 });
