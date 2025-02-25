@@ -20,19 +20,12 @@
     dataRisk_parm = parseFloat(String(data[0].risk_parm) .replace(',', '.'));
 
 
-
-    // Imported data
-    dataNbara = data[0] && !isNaN(parseFloat(String(data[0].nbara).replace(',', '.'))) ? parseFloat(String(data[0].nbara).replace(',', '.')) : 0;
-    dataNbarc = data[0] && !isNaN(parseFloat(String(data[0].nbarc).replace(',', '.'))) ? parseFloat(String(data[0].nbarc).replace(',', '.')) : 0;
-    dataC = data[0] && !isNaN(parseFloat(String(data[0].c).replace(',', '.'))) ? parseFloat(String(data[0].c).replace(',', '.')) : 0;
-    dataRisk_parm = data[0] && !isNaN(parseFloat(String(data[0].risk_parm).replace(',', '.'))) ? parseFloat(String(data[0].risk_parm).replace(',', '.')) : 0;
-    AlaePerOccurence = data[0] && !isNaN(parseFloat(String(data[0].ALAE).replace(',', '.'))) ? parseFloat(String(data[0].ALAE).replace(',', '.')) : 0;
-    ULAE = data[0] && !isNaN(parseFloat(String(data[0].ULAE).replace(',', '.'))) ? parseFloat(String(data[0].ULAE).replace(',', '.')) : 0;
+%>
 
 
 
 
-    // Functions
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -208,27 +201,7 @@
             return result * 0.0000001;
         }
 
-
-%>
-
-
-
-
-
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Versik-Calc</title>
-    <link rel="stylesheet" href="/styles.css">
-</head>
-<body>
-
-    <%- include('form') %>
-    <% if (data.length > 0) { %>
-        <%- include('filteredData') %>
-        <%- include('backupCalcs', {unlimitedValues: unlimitedValues, alphaValue1:alphaValue1, alphaValue2:alphaValue2, alphaValue3:alphaValue3, unlimitedValuesV2:unlimitedValuesV2 }) %>
+    %>
 
     <form action="/filter" method="post" id="filterForm">
         <label for="lob">Select LOB:</label>
@@ -333,9 +306,6 @@
                 <% }); %>
             </tbody>
         </table>
-        %>
-        <h2 class="developer-table">Average Calcs</h2>
-        <table class="developer-table">
         <h2>Average Calcs</h2>
         <table>
             <thead>
