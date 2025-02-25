@@ -23,7 +23,7 @@ node-server-project
 
 1. Navigate to the project directory:
    ```
-   cd server
+   cd mild_calc
    ```
 
 2. Install the dependencies:
