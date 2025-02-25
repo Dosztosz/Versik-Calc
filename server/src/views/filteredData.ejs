@@ -1,0 +1,19 @@
+<h2 class="developer-table">Filtered Data</h2>
+        <table class="developer-table">
+            <thead>
+                <tr>
+                    <% Object.keys(data[0]).forEach(function(key) { %>
+                        <th><%= key %></th>
+                    <% }); %>
+                </tr>
+            </thead>
+            <tbody>
+                <% data.forEach(function(item) { %>
+                    <tr>
+                        <% Object.keys(item).forEach(function(key) { %>
+                            <td><%= item[key] %></td>
+                        <% }); %>
+                    </tr>
+                <% }); %>
+            </tbody>
+        </table>

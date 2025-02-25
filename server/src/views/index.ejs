@@ -18,10 +18,14 @@
     dataNbarc = data[0] && !isNaN(parseFloat(String(data[0].nbarc).replace(',', '.'))) ? parseFloat(String(data[0].nbarc).replace(',', '.')) : 0;
     dataC = data[0] && !isNaN(parseFloat(String(data[0].c).replace(',', '.'))) ? parseFloat(String(data[0].c).replace(',', '.')) : 0;
     dataRisk_parm = data[0] && !isNaN(parseFloat(String(data[0].risk_parm).replace(',', '.'))) ? parseFloat(String(data[0].risk_parm).replace(',', '.')) : 0;
+    var AlaePerOccurence = data[0].ALAE;
+    var ULAE = data[0].ULAE;
 
 
 
     // Functions
+
+
         const unlimitedValues = data.reduce((sum, item) => {
             let productSum = 0;
             for (let i = 1; i <= 12; i++) {
@@ -48,18 +52,6 @@
                 productSum += mean * mean * wt;
             }
             return 2 * (sum + productSum);
-        }, 0);
-
-        const sumProductAlpha1 = data.reduce((sum, item) => {
-            let productSum = 0;
-            for (let i = 1; i <= 12; i++) {
-                const mean = parseFloat(String(item[`Mean${i}`]).replace(',', '.'));
-                const wt = parseFloat(String(item[`Wt${i}`]).replace(',', '.'));
-                if (!isNaN(mean) && !isNaN(wt)) {
-                    productSum += mean * wt;
-                }
-            }
-            return sum + productSum;
         }, 0);
 
         function LimitedAverageSeverity(aValue, uValue, Policylimit){
@@ -113,7 +105,6 @@
             
         }
 
-
         function LimitedAverageSeverityFinal(policyLimit){
             const LimitedAverageSeverityFinal = data.reduce((sum, item) => {
                 let productSum = 0;
@@ -140,9 +131,6 @@
             return sumProductAverage / averageBLLW;
         }
 
-
-
-        //Frequency risk load Amount
 
         function processRisk(alphaK1, alphaK2, alphaK3){
 
@@ -172,83 +160,13 @@
     <link rel="stylesheet" href="/styles.css">
 </head>
 <body>
-    <% 
-        
 
-    %>
-    <h1>Select Table</h1>
-    <form action="/filter" method="post" id="filterForm">
-        <label for="lob">Select LOB:</label>
-        <select name="lob" id="lob" onchange="document.getElementById('filterForm').submit()">
-            <% lobs.forEach(function(lob) { %>
-                <option value="<%= lob %>" <%= lob === selectedLob ? 'selected' : '' %>><%= lob %></option>
-            <% }); %>
-        </select>
-        
-        <% if (names && names.length > 0) { %>
-            <label for="name">Select Name:</label>
-            <select name="name" id="name">
-                <% names.forEach(function(name) { %>
-                    <option value="<%= name %>" <%= name === selectedName ? 'selected' : '' %>><%= name %></option>
-                <% }); %>
-            </select>
-        <% } %>
-
-        <button type="submit">Filter</button>
-    </form>
-    <div>
-
-    </div>
-    <h2 class="developer-table">Filtered Data</h2>
+    <%- include('form') %>
     <% if (data.length > 0) { %>
-        <table class="developer-table">
-            <thead>
-                <tr>
-                    <% Object.keys(data[0]).forEach(function(key) { %>
-                        <th><%= key %></th>
-                    <% }); %>
-                </tr>
-            </thead>
-            <tbody>
-                <% data.forEach(function(item) { %>
-                    <tr>
-                        <% Object.keys(item).forEach(function(key) { %>
-                            <td><%= item[key] %></td>
-                        <% }); %>
-                    </tr>
-                <% }); %>
-            </tbody>
-        </table>
-        <h2 class="developer-table">Backup Calcs</h2>
-        <table class="developer-table">
-            <thead>
-                <tr>
-                    <th>Row</th>
-                    <th>Value</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr>
-                    <td>Unlimited Values</td>
-                    <td><%= Math.floor(unlimitedValues * alphaValue1) %></td>
-                    <td><%= Math.floor(unlimitedValues * alphaValue2) %></td>
-                    <td><%= Math.floor(unlimitedValues * alphaValue3) %></td>
-                    <td><%= Math.floor(unlimitedValuesV2 * alphaValue1 * alphaValue1) %></td>
-                    <td><%= Math.floor(unlimitedValuesV2 * alphaValue2) %></td>
-                    <td><%= Math.floor(unlimitedValuesV2 * alphaValue3 * alphaValue3) %></td>
-                </tr>
-                <tr>
-                    <td>Alpha=</td>
-                    <td><%= alphaValue1 %></td>
-                    <td><%= alphaValue2 %></td>
-                    <td><%= alphaValue3 %></td>
-                    <td><%= alphaValue1 %></td>
-                    <td><%= alphaValue2 %></td>
-                    <td><%= alphaValue3 %></td>
-                </tr>
-            </tbody>
-        </table>
+        <%- include('filteredData') %>
+        <%- include('backupCalcs', {unlimitedValues: unlimitedValues, alphaValue1:alphaValue1, alphaValue2:alphaValue2, alphaValue3:alphaValue3, unlimitedValuesV2:unlimitedValuesV2 }) %>
 
+        <!-- Backup Calcs V2 Display: none -->
         <h2 class="developer-table">Backup Calcs V2</h2>
         <table class="developer-table">
             <thead>
@@ -273,16 +191,18 @@
                         
 
                     const BLLW = parseFloat(String(data[0][Object.keys(data[0])[index + 15]]).replace(',', '.'));  
-                    BLLWArray.push(BLLW);  //Dodane toFixed(0)
+                    BLLWArray.push(BLLW);
                     averageBLLW += BLLW;
                     
+                    //
                     alphaK1 = LimitedAverageSeverity(alphaValue1, unlimitedValues * alphaValue1, limit)
                     alphaK2 = LimitedAverageSeverity(alphaValue2, unlimitedValues * alphaValue2, limit)
                     alphaK3 = LimitedAverageSeverity(alphaValue3, unlimitedValues * alphaValue3, limit)
 
-                    alphaArray1.push(LimitedAverageSeverity(alphaValue1, unlimitedValues * alphaValue1, limit))
-                    alphaArray2.push(LimitedAverageSeverity(alphaValue2, unlimitedValues * alphaValue2, limit))
-                    alphaArray3.push(LimitedAverageSeverity(alphaValue3, unlimitedValues * alphaValue3, limit))
+                    // Pushing values to arrays to use it in main calculations
+                    alphaArray1.push(alphaK1)
+                    alphaArray2.push(alphaK2)
+                    alphaArray3.push(alphaK3)
 
                     processRiskArray.push(processRisk(alphaK1, alphaK2, alphaK3))
                     processSeverityArray.push(processSeverity(alphaK1, alphaK2, alphaK3))
@@ -303,6 +223,7 @@
                 <% }); %>
             </tbody>
         </table>
+        %>
         <h2 class="developer-table">Average Calcs</h2>
         <table class="developer-table">
             <thead>
@@ -326,6 +247,8 @@
             </tbody>
             
         </table>
+        %>
+        <!-- Main Calcs -->
         <table>
             <thead>
                 <tr>
@@ -340,34 +263,27 @@
                 </tr>
             </thead>
             <tbody>
-                <% for (let i = 0; i < policyLimits.length; i++) { %>
+                <% 
+                
+                for (let i = 0; i < policyLimits.length; i++) { %>
                     <% 
                     
                     var LimitedAverageSeverityFinalResult = parseFloat(LimitedAverageSeverityFinal(policyLimits[i]));
-                    var AlaePerOccurence = data[0].ALAE;
-                    var ULAE = data[0].ULAE;
+                    ULAE = parseFloat(String(ULAE).replace(',', '.'));
+                    AlaePerOccurence = parseFloat(String(AlaePerOccurence).replace(',', '.'));
+                    var UlaePerOccurence = (ULAE * (LimitedAverageSeverityFinalResult + AlaePerOccurence)).toFixed(0)
+                    var stableSum = parseFloat(LimitedAverageSeverityFinal(policyLimits[0])) + AlaePerOccurence + (ULAE * (parseFloat(LimitedAverageSeverityFinal(policyLimits[0])) + AlaePerOccurence));
+                    var WithoutRiskLoad = ((LimitedAverageSeverityFinalResult + AlaePerOccurence + parseFloat(UlaePerOccurence))/(stableSum)).toFixed(2);
+                    var finalRiskLoadAmountsResult = FinalRiskLoadAmounts(policyLimits[i]*1000)
+                    var StableLimitedAverageSeverityFinalResult = parseFloat(LimitedAverageSeverityFinal(policyLimits[0]));
+                    var StableUlaePerOccurance = (ULAE * (StableLimitedAverageSeverityFinalResult + AlaePerOccurence)).toFixed(0)
 
+                    
+                    var StableFinalRiskLoadAmountsResult = FinalRiskLoadAmounts(policyLimits[0]*1000)
+                    var ParameterRiskLoad = (processRiskArray[i] + processSeverityArray[i]).toFixed(0)
 
-                        
-
-                        ULAE = parseFloat(String(ULAE).replace(',', '.'));
-                        AlaePerOccurence = parseFloat(String(AlaePerOccurence).replace(',', '.'));
-
-                        var UlaePerOccurence = (ULAE * (LimitedAverageSeverityFinalResult + AlaePerOccurence)).toFixed(0)
-
-                        var stableSum = parseFloat(LimitedAverageSeverityFinal(policyLimits[0])) + AlaePerOccurence + (ULAE * (parseFloat(LimitedAverageSeverityFinal(policyLimits[0])) + AlaePerOccurence));
-
-                        var WithoutRiskLoad = ((LimitedAverageSeverityFinalResult + AlaePerOccurence + parseFloat(UlaePerOccurence))/(stableSum)).toFixed(2);
-
-                        var finalRiskLoadAmountsResult = FinalRiskLoadAmounts(policyLimits[i]*1000)
-                        //(B10+C10+D10)/($B$10+$C$10+$D$10)
-
-                        var StableLimitedAverageSeverityFinalResult = parseFloat(LimitedAverageSeverityFinal(policyLimits[0]));
-                        var StableUlaePerOccurance = (ULAE * (StableLimitedAverageSeverityFinalResult + AlaePerOccurence)).toFixed(0)
-                        var ParameterRiskLoad = (processRiskArray[i] + processSeverityArray[i]).toFixed(0)
-                        var StableParameterRiskLoad = (processRiskArray[0] + processSeverityArray[0]).toFixed(0)
-                        var StableFinalRiskLoadAmountsResult = FinalRiskLoadAmounts(policyLimits[0]*1000)
-                        var ilfWithRiskLoad = (LimitedAverageSeverityFinalResult + AlaePerOccurence + parseFloat(UlaePerOccurence) + parseFloat(finalRiskLoadAmountsResult) + parseFloat(ParameterRiskLoad))/(StableLimitedAverageSeverityFinalResult + parseFloat(AlaePerOccurence) + parseFloat(StableUlaePerOccurance) + parseFloat(StableFinalRiskLoadAmountsResult) + parseFloat(StableParameterRiskLoad))
+                    var StableParameterRiskLoad = (processRiskArray[0] + processSeverityArray[0]).toFixed(0)
+                    var ilfWithRiskLoad = (LimitedAverageSeverityFinalResult + AlaePerOccurence + parseFloat(UlaePerOccurence) + parseFloat(finalRiskLoadAmountsResult) + parseFloat(ParameterRiskLoad))/(StableLimitedAverageSeverityFinalResult + parseFloat(AlaePerOccurence) + parseFloat(StableUlaePerOccurance) + parseFloat(StableFinalRiskLoadAmountsResult) + parseFloat(StableParameterRiskLoad))
                     %>
                     <tr>
                         <td><%= policyLimits[i] %></td>
@@ -380,9 +296,25 @@
                         <td><%= ilfWithRiskLoad.toFixed(2) %></td>
                     </tr>
 
-                <% } %>
+                <% 
+            } %>
             </tbody>
         </table>
+        <button id="toggleDeveloperTable">Show Developer Tables</button>
+        <script>
+            document.getElementById('toggleDeveloperTable').addEventListener('click', function() {
+                var developerTables = document.querySelectorAll('.developer-table');
+                developerTables.forEach(function(table) {
+                    if (table.style.display === 'none' || table.style.display === '') {
+                        table.style.display = 'block';
+                        document.getElementById('toggleDeveloperTable').innerText = 'Hide Developer Tables';
+                    } else {
+                        table.style.display = 'none';
+                        document.getElementById('toggleDeveloperTable').innerText = 'Show Developer Tables';
+                    }
+                });
+            });
+        </script>
 
     
     <% } else { %>
