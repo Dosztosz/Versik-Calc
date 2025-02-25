@@ -15,10 +15,14 @@
     dataRisk_parm = parseFloat(String(data[0].risk_parm) .replace(',', '.'));
 
 
-%>
 
 
 
+    // Imported data
+    dataNbara = data[0] && !isNaN(parseFloat(String(data[0].nbara).replace(',', '.'))) ? parseFloat(String(data[0].nbara).replace(',', '.')) : 0;
+    dataNbarc = data[0] && !isNaN(parseFloat(String(data[0].nbarc).replace(',', '.'))) ? parseFloat(String(data[0].nbarc).replace(',', '.')) : 0;
+    dataC = data[0] && !isNaN(parseFloat(String(data[0].c).replace(',', '.'))) ? parseFloat(String(data[0].c).replace(',', '.')) : 0;
+    dataRisk_parm = data[0] && !isNaN(parseFloat(String(data[0].risk_parm).replace(',', '.'))) ? parseFloat(String(data[0].risk_parm).replace(',', '.')) : 0;
 
 
 <!DOCTYPE html>
@@ -78,6 +82,7 @@
         const policyLimitsV2 = [100000, 200000, 250000, 300000, 500000, 750000, 1000000, 1500000, 2000000, 2500000, 3000000, 4000000, 5000000, 10000000];
 
 
+    // Functions
         const unlimitedValues = data.reduce((sum, item) => {
             let productSum = 0;
             for (let i = 1; i <= 12; i++) {
@@ -104,6 +109,18 @@
                 productSum += mean * mean * wt;
             }
             return 2 * (sum + productSum);
+        }, 0);
+
+        const sumProductAlpha1 = data.reduce((sum, item) => {
+            let productSum = 0;
+            for (let i = 1; i <= 12; i++) {
+                const mean = parseFloat(String(item[`Mean${i}`]).replace(',', '.'));
+                const wt = parseFloat(String(item[`Wt${i}`]).replace(',', '.'));
+                if (!isNaN(mean) && !isNaN(wt)) {
+                    productSum += mean * wt;
+                }
+            }
+            return sum + productSum;
         }, 0);
 
         function LimitedAverageSeverity(aValue, uValue, Policylimit){
@@ -158,8 +175,8 @@
         }
 
 
-        function LimitedAvergaeSeverity(){
-            const LimitedAvergaeSeverity = data.reduce((sum, item) => {
+        function LimitedAverageSeverityFinal(policyLimit){
+            const LimitedAverageSeverityFinal = data.reduce((sum, item) => {
                 let productSum = 0;
                 for (let i = 1; i <= 12; i++) {
                     const mean = parseFloat(String(item[`Mean${i}`]).replace(',', '.'));
@@ -218,9 +235,48 @@
         <button type="submit">Filter</button>
     </form>
 
-    <h2>Filtered Data</h2>
+
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Versik-Calc</title>
+    <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+    <% 
+        
+
+    %>
+    <h1>Select Table</h1>
+    <form action="/filter" method="post" id="filterForm">
+        <label for="lob">Select LOB:</label>
+        <select name="lob" id="lob" onchange="document.getElementById('filterForm').submit()">
+            <% lobs.forEach(function(lob) { %>
+                <option value="<%= lob %>" <%= lob === selectedLob ? 'selected' : '' %>><%= lob %></option>
+            <% }); %>
+        </select>
+        
+        <% if (names && names.length > 0) { %>
+            <label for="name">Select Name:</label>
+            <select name="name" id="name">
+                <% names.forEach(function(name) { %>
+                    <option value="<%= name %>" <%= name === selectedName ? 'selected' : '' %>><%= name %></option>
+                <% }); %>
+            </select>
+        <% } %>
+
+        <button type="submit">Filter</button>
+    </form>
+    <div>
+
+    </div>
+    <h2 class="developer-table">Filtered Data</h2>
     <% if (data.length > 0) { %>
-        <table>
+        <table class="developer-table">
             <thead>
                 <tr>
                     <% Object.keys(data[0]).forEach(function(key) { %>
@@ -238,8 +294,8 @@
                 <% }); %>
             </tbody>
         </table>
-        <h2>Backup Calcs</h2>
-        <table>
+        <h2 class="developer-table">Backup Calcs</h2>
+        <table class="developer-table">
             <thead>
                 <tr>
                     <th>Row</th>
@@ -268,8 +324,8 @@
             </tbody>
         </table>
 
-        <h2>Backup Calcs V2</h2>
-        <table>
+        <h2 class="developer-table">Backup Calcs V2</h2>
+        <table class="developer-table">
             <thead>
                 <tr>
                     <th>Policy Limit</th>
@@ -286,7 +342,26 @@
                 </tr>
             </thead>
             <tbody>
-                <% policyLimitsV2.forEach(function(limit, index) { %>
+                <% 
+                    var averageBLLW = 0;
+                    policyLimitsV2.forEach(function(limit, index) { 
+                        
+
+                    const BLLW = parseFloat(String(data[0][Object.keys(data[0])[index + 15]]).replace(',', '.'));  
+                    BLLWArray.push(BLLW);  //Dodane toFixed(0)
+                    averageBLLW += BLLW;
+                    
+                    alphaK1 = LimitedAverageSeverity(alphaValue1, unlimitedValues * alphaValue1, limit)
+                    alphaK2 = LimitedAverageSeverity(alphaValue2, unlimitedValues * alphaValue2, limit)
+                    alphaK3 = LimitedAverageSeverity(alphaValue3, unlimitedValues * alphaValue3, limit)
+
+                    alphaArray1.push(LimitedAverageSeverity(alphaValue1, unlimitedValues * alphaValue1, limit))
+                    alphaArray2.push(LimitedAverageSeverity(alphaValue2, unlimitedValues * alphaValue2, limit))
+                    alphaArray3.push(LimitedAverageSeverity(alphaValue3, unlimitedValues * alphaValue3, limit))
+
+                    processRiskArray.push(processRisk(alphaK1, alphaK2, alphaK3))
+                    processSeverityArray.push(processSeverity(alphaK1, alphaK2, alphaK3))
+                        %>
                     <tr>
                         <td><%= limit %></td>
                         <td><%= data[0][Object.keys(data[0])[index + 15]] %></td>
@@ -301,8 +376,8 @@
                 <% }); %>
             </tbody>
         </table>
-        <h2>Average Calcs</h2>
-        <table>
+        <h2 class="developer-table">Average Calcs</h2>
+        <table class="developer-table">
             <thead>
                 <tr>
                     <td>Average BLLW</td>
@@ -324,7 +399,6 @@
             </tbody>
             
         </table>
-        <h2>Mild Calcs</h2>
         <table>
             <thead>
                 <tr>
