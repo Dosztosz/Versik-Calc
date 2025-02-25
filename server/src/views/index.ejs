@@ -1,0 +1,325 @@
+<%
+    // Variables
+    alphaArray1 = [];
+    alphaArray2 = [];
+    alphaArray3 = [];
+    BLLWArray = [];
+    processRiskArray = [];
+    processSeverityArray = [];
+
+    // Static data
+    const policyLimits = [100, 200, 250, 300, 500, 750, 1000, 1500, 2000, 2500, 3000, 4000, 5000, 10000];
+    const policyLimitsV2 = [100000, 200000, 250000, 300000, 500000, 750000, 1000000, 1500000, 2000000, 2500000, 3000000, 4000000, 5000000, 10000000];
+
+
+
+    // Imported data
+    dataNbara = data[0] && !isNaN(parseFloat(String(data[0].nbara).replace(',', '.'))) ? parseFloat(String(data[0].nbara).replace(',', '.')) : 0;
+    dataNbarc = data[0] && !isNaN(parseFloat(String(data[0].nbarc).replace(',', '.'))) ? parseFloat(String(data[0].nbarc).replace(',', '.')) : 0;
+    dataC = data[0] && !isNaN(parseFloat(String(data[0].c).replace(',', '.'))) ? parseFloat(String(data[0].c).replace(',', '.')) : 0;
+    dataRisk_parm = data[0] && !isNaN(parseFloat(String(data[0].risk_parm).replace(',', '.'))) ? parseFloat(String(data[0].risk_parm).replace(',', '.')) : 0;
+    AlaePerOccurence = data[0] && !isNaN(parseFloat(String(data[0].ALAE).replace(',', '.'))) ? parseFloat(String(data[0].ALAE).replace(',', '.')) : 0;
+    ULAE = data[0] && !isNaN(parseFloat(String(data[0].ULAE).replace(',', '.'))) ? parseFloat(String(data[0].ULAE).replace(',', '.')) : 0;
+
+
+
+
+    // Functions
+
+
+        const unlimitedValues = data.reduce((sum, item) => {
+            let productSum = 0;
+            for (let i = 1; i <= 12; i++) {
+                const mean = parseFloat(String(item[`Mean${i}`]).replace(',', '.'));
+                const wt = parseFloat(String(item[`Wt${i}`]).replace(',', '.'));
+                if (!isNaN(mean) && !isNaN(wt)) {
+                    productSum += mean * wt;
+                }
+            }
+            return sum + productSum;
+        }, 0);
+
+        const alphaValue1 = data[0] && !isNaN(parseFloat(data[0].a)) ? 
+            (1 - Math.sqrt(parseFloat((data[0].a).replace(',', '.')) * 3)) : 'N/A';
+        const alphaValue2 = 1;
+        const alphaValue3 = data[0] && !isNaN(parseFloat(data[0].a)) ? 
+            (1 + Math.sqrt(parseFloat((data[0].a).replace(',', '.')) * 3)) : 'N/A';
+
+        const unlimitedValuesV2 = data.reduce((sum, item) => {
+            let productSum = 0;
+            for (let i = 1; i <= 12; i++) {
+                const mean = parseFloat(String(item[`Mean${i}`]).replace(',', '.'));
+                const wt = parseFloat(String(item[`Wt${i}`]).replace(',', '.'));
+                productSum += mean * mean * wt;
+            }
+            return 2 * (sum + productSum);
+        }, 0);
+
+        function LimitedAverageSeverity(aValue, uValue, Policylimit){
+            const LimitedAverageSeverity = data.reduce((sum, item) => {
+                let productSum = 0;
+                for (let i = 1; i <= 12; i++) {
+                    const mean = parseFloat(String(item[`Mean${i}`]).replace(',', '.')) * aValue;
+                    const wt = parseFloat(String(item[`Wt${i}`]).replace(',', '.'));
+
+
+                    if (!isNaN(mean) && !isNaN(wt)) {
+                        productSum += mean * wt * Math.exp(-Policylimit / mean);
+                    }
+                }
+                return sum + productSum;
+            }, 0);
+            return uValue - LimitedAverageSeverity;
+        }
+
+        function LimitedSecondMoment(aValue, uValue, Policylimit){
+            const LimitedSecondMoment = data.reduce((sum, item) => {
+                let productSum = 0;
+                for (let i = 1; i <= 12; i++) {
+                    const mean = parseFloat(String(item[`Mean${i}`]).replace(',', '.')) * aValue;
+                    const wt = parseFloat(String(item[`Wt${i}`]).replace(',', '.'));
+
+
+                    if (!isNaN(mean) && !isNaN(wt)) {
+                        productSum += mean * wt * (mean + Policylimit) * Math.exp(-Policylimit / mean);
+                    }
+                }
+                return sum + productSum;
+            }, 0);
+            return uValue - 2 * LimitedSecondMoment;
+        }
+
+        function FinalRiskLoadAmounts(PolicyLimit){
+            const risk_parm = parseFloat(String(dataRisk_parm).replace(',', '.'));
+            const d = parseFloat(String(data[0].d).replace(',', '.'));
+
+            const AverageAlpha1 = LimitedAverageSeverity(alphaValue1, unlimitedValues * alphaValue1, PolicyLimit)
+            const AverageAlpha2 = LimitedAverageSeverity(alphaValue2, unlimitedValues * alphaValue2, PolicyLimit)
+            const AverageAlpha3 = LimitedAverageSeverity(alphaValue3, unlimitedValues * alphaValue3, PolicyLimit)
+            const SecondAlpha1 = LimitedSecondMoment(alphaValue1, unlimitedValuesV2 * alphaValue1 * alphaValue1, PolicyLimit)
+            const SecondAlpha2 = LimitedSecondMoment(alphaValue2, unlimitedValuesV2 * alphaValue2, PolicyLimit)
+            const SecondAlpha3 = LimitedSecondMoment(alphaValue3, unlimitedValuesV2 * alphaValue3 * alphaValue3, PolicyLimit)
+
+            return (risk_parm * 0.0000001 * 
+                    ((SecondAlpha1 + 4 * SecondAlpha2 + SecondAlpha3) +
+                    (d * (Math.pow(AverageAlpha1, 2) + 4 * Math.pow(AverageAlpha2, 2) + Math.pow(AverageAlpha3, 2))))/6).toFixed(0);
+            
+        }
+
+        function LimitedAverageSeverityFinal(policyLimit){
+            const LimitedAverageSeverityFinal = data.reduce((sum, item) => {
+                let productSum = 0;
+                for (let i = 1; i <= 12; i++) {
+                    const mean = parseFloat(String(item[`Mean${i}`]).replace(',', '.'));
+                    const wt = parseFloat(String(item[`Wt${i}`]).replace(',', '.'));
+
+                    const expComponent = 1 - Math.exp((-1 / mean) * 1000 * policyLimit)
+                    
+                    productSum += expComponent * mean * wt;
+                }
+                return sum + productSum;
+                }, 0);
+            return LimitedAverageSeverityFinal.toFixed(0);
+        }
+
+
+
+        function CalculateAverage(alphaValue){
+            let sumProductAverage = 0;
+            for (let i = 0; i < alphaValue.length; i++){
+                sumProductAverage += alphaValue[i] * BLLWArray[i];
+            }
+            return sumProductAverage / averageBLLW;
+        }
+
+
+        function processRisk(alphaK1, alphaK2, alphaK3){
+
+
+            result = 2*dataNbarc*dataC*dataRisk_parm*(alphaK1*averageAlphaArray1+4*alphaK2*averageAlphaArray2+alphaK3*averageAlphaArray3)/6
+            return result * 0.0000001;
+
+        }
+        function processSeverity(alphaK1, alphaK2, alphaK3){
+            result = 2*dataNbara*dataRisk_parm*((alphaK1*averageAlphaArray1+4*alphaK2*averageAlphaArray2+alphaK3*averageAlphaArray3)/6-(alphaK1+4*alphaK2+alphaK3)/6*ghLas)
+            return result * 0.0000001;
+        }
+
+
+%>
+
+
+
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Versik-Calc</title>
+    <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+
+    <%- include('form') %>
+    <% if (data.length > 0) { %>
+        <%- include('filteredData') %>
+        <%- include('backupCalcs', {unlimitedValues: unlimitedValues, alphaValue1:alphaValue1, alphaValue2:alphaValue2, alphaValue3:alphaValue3, unlimitedValuesV2:unlimitedValuesV2 }) %>
+
+        <!-- Backup Calcs V2 Display: none -->
+        <h2 class="developer-table">Backup Calcs V2</h2>
+        <table class="developer-table">
+            <thead>
+                <tr>
+                    <th>Policy Limit</th>
+                    <th>Bsc Lim Loss Wt</th>
+                    <th>Alpha1</th>
+                    <th>Alpha2</th>
+                    <th>Alpha3</th>
+                    <th>Alpha1</th>
+                    <th>Alpha2</th>
+                    <th>Alpha3</th>
+                    <th>Process</th>
+                    <th>Frequency</th>
+                    <th>Severity</th>
+                </tr>
+            </thead>
+            <tbody>
+                <% 
+                    var averageBLLW = 0;
+                    policyLimitsV2.forEach(function(limit, index) { 
+                        
+
+                    const BLLW = parseFloat(String(data[0][Object.keys(data[0])[index + 15]]).replace(',', '.'));  
+                    BLLWArray.push(BLLW);
+                    averageBLLW += BLLW;
+                    
+                    //
+                    alphaK1 = LimitedAverageSeverity(alphaValue1, unlimitedValues * alphaValue1, limit)
+                    alphaK2 = LimitedAverageSeverity(alphaValue2, unlimitedValues * alphaValue2, limit)
+                    alphaK3 = LimitedAverageSeverity(alphaValue3, unlimitedValues * alphaValue3, limit)
+
+                    // Pushing values to arrays to use it in main calculations
+                    alphaArray1.push(alphaK1)
+                    alphaArray2.push(alphaK2)
+                    alphaArray3.push(alphaK3)
+
+                    processRiskArray.push(processRisk(alphaK1, alphaK2, alphaK3))
+                    processSeverityArray.push(processSeverity(alphaK1, alphaK2, alphaK3))
+                        %>
+                    <tr>
+                        <td><%= limit %></td>
+                        <td><%= BLLW.toFixed(4) %></td>
+                        <td><%= alphaK1.toFixed(0) %></td>
+                        <td><%= alphaK2.toFixed(0)%></td>
+                        <td><%= alphaK3.toFixed(0) %></td>
+                        <td><%= LimitedSecondMoment(alphaValue1, unlimitedValuesV2 * alphaValue1 * alphaValue1, limit).toFixed(0) %></td>
+                        <td><%= LimitedSecondMoment(alphaValue2, unlimitedValuesV2 * alphaValue2, limit).toFixed(0) %></td>
+                        <td><%= LimitedSecondMoment(alphaValue3, unlimitedValuesV2 * alphaValue3 * alphaValue3, limit).toFixed(0) %></td>
+                        <td><%= FinalRiskLoadAmounts(limit) %></td>
+                        <td><%= processRisk(alphaK1, alphaK2, alphaK3) %></td>
+                        <td><%= processSeverity(alphaK1, alphaK2, alphaK3) %></td>
+                    </tr>
+                <% }); %>
+            </tbody>
+        </table>
+        %>
+        <h2 class="developer-table">Average Calcs</h2>
+        <table class="developer-table">
+            <thead>
+                <tr>
+                    <td>Average BLLW</td>
+                    <td>Average Alpha1</td>
+                    <td>Average Alpha2</td>
+                    <td>Average Alpha3</td>
+                    <td>G-H LAS:</td>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><%= averageBLLW.toFixed(0) %></td>
+                    <td><%= averageAlphaArray1 = parseFloat(CalculateAverage(alphaArray1).toFixed(0)) %></td>
+                    <td><%= averageAlphaArray2 = parseFloat(CalculateAverage(alphaArray2).toFixed(0)) %></td>
+                    <td><%= averageAlphaArray3 = parseFloat(CalculateAverage(alphaArray3).toFixed(0)) %></td>
+                    <td><%= ghLas = (averageAlphaArray1 + 4*averageAlphaArray2 + averageAlphaArray3)/6 %></td>
+
+                </tr>
+            </tbody>
+            
+        </table>
+        %>
+        <!-- Main Calcs -->
+        <table>
+            <thead>
+                <tr>
+                    <th>Policy limit</th>
+                    <th>Limited Avergae Severity</th>
+                    <th>ALAE per Occurence</th>
+                    <th>ULAE per Occurence</th>
+                    <th>Without Risk Load</th>
+                    <th>Process Risk Load</th>
+                    <th>Parameter Risk Load</th>
+                    <th>ILF With Risk Load</th>
+                </tr>
+            </thead>
+            <tbody>
+                <% 
+                
+                for (let i = 0; i < policyLimits.length; i++) { %>
+                    <% 
+                    
+                    var LimitedAverageSeverityFinalResult = parseFloat(LimitedAverageSeverityFinal(policyLimits[i]));
+                    ULAE = parseFloat(String(ULAE).replace(',', '.'));
+                    AlaePerOccurence = parseFloat(String(AlaePerOccurence).replace(',', '.'));
+                    var UlaePerOccurence = (ULAE * (LimitedAverageSeverityFinalResult + AlaePerOccurence)).toFixed(0)
+                    var stableSum = parseFloat(LimitedAverageSeverityFinal(policyLimits[0])) + AlaePerOccurence + (ULAE * (parseFloat(LimitedAverageSeverityFinal(policyLimits[0])) + AlaePerOccurence));
+                    var WithoutRiskLoad = ((LimitedAverageSeverityFinalResult + AlaePerOccurence + parseFloat(UlaePerOccurence))/(stableSum)).toFixed(2);
+                    var finalRiskLoadAmountsResult = FinalRiskLoadAmounts(policyLimits[i]*1000)
+                    var StableLimitedAverageSeverityFinalResult = parseFloat(LimitedAverageSeverityFinal(policyLimits[0]));
+                    var StableUlaePerOccurance = (ULAE * (StableLimitedAverageSeverityFinalResult + AlaePerOccurence)).toFixed(0)
+
+                    
+                    var StableFinalRiskLoadAmountsResult = FinalRiskLoadAmounts(policyLimits[0]*1000)
+                    var ParameterRiskLoad = (processRiskArray[i] + processSeverityArray[i]).toFixed(0)
+
+                    var StableParameterRiskLoad = (processRiskArray[0] + processSeverityArray[0]).toFixed(0)
+                    var ilfWithRiskLoad = (LimitedAverageSeverityFinalResult + AlaePerOccurence + parseFloat(UlaePerOccurence) + parseFloat(finalRiskLoadAmountsResult) + parseFloat(ParameterRiskLoad))/(StableLimitedAverageSeverityFinalResult + parseFloat(AlaePerOccurence) + parseFloat(StableUlaePerOccurance) + parseFloat(StableFinalRiskLoadAmountsResult) + parseFloat(StableParameterRiskLoad))
+                    %>
+                    <tr>
+                        <td><%= policyLimits[i] %></td>
+                        <td><%= LimitedAverageSeverityFinalResult %></td>
+                        <td><%= AlaePerOccurence %></td>
+                        <td><%= UlaePerOccurence %></td>
+                        <td><%= WithoutRiskLoad %></td>
+                        <td><%= finalRiskLoadAmountsResult %></td>
+                        <td><%= ParameterRiskLoad %></td>
+                        <td><%= ilfWithRiskLoad.toFixed(2) %></td>
+                    </tr>
+
+                <% 
+            } %>
+            </tbody>
+        </table>
+        <button id="toggleDeveloperTable">Show Developer Tables</button>
+        <script>
+            document.getElementById('toggleDeveloperTable').addEventListener('click', function() {
+                var developerTables = document.querySelectorAll('.developer-table');
+                developerTables.forEach(function(table) {
+                    if (table.style.display === 'none' || table.style.display === '') {
+                        table.style.display = 'block';
+                        document.getElementById('toggleDeveloperTable').innerText = 'Hide Developer Tables';
+                    } else {
+                        table.style.display = 'none';
+                        document.getElementById('toggleDeveloperTable').innerText = 'Show Developer Tables';
+                    }
+                });
+            });
+        </script>
+
+    
+    <% } else { %>
+        <p>No data available</p>
+    <% } %>
+</body>
+</html>

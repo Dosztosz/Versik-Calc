@@ -1,0 +1,20 @@
+<h1>Select Table</h1>
+<form action="/filter" method="post" id="filterForm">
+    <label for="lob">Select LOB:</label>
+    <select name="lob" id="lob" onchange="document.getElementById('filterForm').submit()">
+        <% lobs.forEach(function(lob) { %>
+            <option value="<%= lob %>" <%= lob === selectedLob ? 'selected' : '' %>><%= lob %></option>
+        <% }); %>
+    </select>
+    
+    <% if (names && names.length > 0) { %>
+        <label for="name">Select Name:</label>
+        <select name="name" id="name">
+            <% names.forEach(function(name) { %>
+                <option value="<%= name %>" <%= name === selectedName ? 'selected' : '' %>><%= name %></option>
+            <% }); %>
+        </select>
+    <% } %>
+
+    <button type="submit">Filter</button>
+</form>
