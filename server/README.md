@@ -1,6 +1,6 @@
-# Node.js Server Project
+# Mild Calc
 
-This project is a simple Node.js server application that demonstrates the use of controllers, routes, and models. 
+This project is a Mild Calculator made for assignment. The data.csv file is a file with all necessary data imported to MongoDB. import.py is a mini executable to import the CSV to MongoDB. Please feel free to check everything.
 
 ## Project Structure
 
@@ -20,34 +20,21 @@ node-server-project
 
 ## Getting Started
 
-1. Clone the repository:
+
+1. Navigate to the project directory:
    ```
-   git clone <repository-url>
+   cd server
    ```
 
-2. Navigate to the project directory:
-   ```
-   cd node-server-project
-   ```
-
-3. Install the dependencies:
+2. Install the dependencies:
    ```
    npm install
    ```
 
-4. Start the server:
+3. Start the server:
    ```
-   npm start
+   node src/server.js
    ```
-
-## Usage
-
-- The server listens on a specified port and can handle various HTTP requests.
-- You can access the root route to see the response from the IndexController.
-
-## Contributing
-
-Feel free to submit issues or pull requests for improvements or bug fixes. 
 
 ## License
 
