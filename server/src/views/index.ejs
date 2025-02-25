@@ -1,4 +1,4 @@
-<<<<<<< HEAD
+
 <%
     alphaArray1 = [];
     alphaArray2 = [];
@@ -6,7 +6,6 @@
     BLLWArray = [];
     processRiskArray = [];
     processSeverityArray = [];
-<<<<<<< HEAD
     averageAlphaArray1 = 0;
     averageAlphaArray2 = 0;
     averageAlphaArray3 = 0;
@@ -22,7 +21,6 @@
 
 
 
-<<<<<<< HEAD
     // Imported data
     dataNbara = data[0] && !isNaN(parseFloat(String(data[0].nbara).replace(',', '.'))) ? parseFloat(String(data[0].nbara).replace(',', '.')) : 0;
     dataNbarc = data[0] && !isNaN(parseFloat(String(data[0].nbarc).replace(',', '.'))) ? parseFloat(String(data[0].nbarc).replace(',', '.')) : 0;
@@ -35,36 +33,6 @@
 
 
     // Functions
-=======
-=======
-    parseFloat(String(data[0].d).replace(',', '.'));
-%>
-
-
-
-
-
->>>>>>> parent of 3f9e16e (Last point before Optimalization)
-=======
-
-
-
-    // Data
-    dataNbara = parseFloat(String(data[0].nbara).replace(',', '.'));
-    dataNbarc = parseFloat(String(data[0].nbarc).replace(',', '.'));
-    dataC = parseFloat(String(data[0].c).replace(',', '.'));
-    dataRisk_parm = parseFloat(String(data[0].risk_parm) .replace(',', '.'));
-
-
-
-    parseFloat(String(data[0].d).replace(',', '.'));
-%>
-
-
-
-
-
->>>>>>> parent of 3f9e16e (Last point before Optimalization)
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -118,19 +86,8 @@
 </head>
 <body>
     <% 
-<<<<<<< HEAD
-<<<<<<< HEAD
-        const policyLimits = [100, 200, 250, 300, 500, 750, 1000, 1500, 2000, 2000, 2500, 3000, 4000, 5000];
-        const policyLimitsV2 = [100000, 200000, 250000, 300000, 500000, 750000, 1000000, 1500000, 2000000, 2500000, 3000000, 4000000, 5000000, 10000000];
->>>>>>> parent of 7c25921 (Finished Project)
-=======
         const policyLimits = [100, 200, 250, 300, 500, 750, 1000, 1500, 2000, 2500, 3000, 4000, 5000, 10000];
         const policyLimitsV2 = [100000, 200000, 250000, 300000, 500000, 750000, 1000000, 1500000, 2000000, 2500000, 3000000, 4000000, 5000000, 10000000];
->>>>>>> parent of 3f9e16e (Last point before Optimalization)
-=======
-        const policyLimits = [100, 200, 250, 300, 500, 750, 1000, 1500, 2000, 2500, 3000, 4000, 5000, 10000];
-        const policyLimitsV2 = [100000, 200000, 250000, 300000, 500000, 750000, 1000000, 1500000, 2000000, 2500000, 3000000, 4000000, 5000000, 10000000];
->>>>>>> parent of 3f9e16e (Last point before Optimalization)
 
 
         const unlimitedValues = data.reduce((sum, item) => {
@@ -212,14 +169,11 @@
             
         }
 
-<<<<<<< HEAD
         function LimitedAverageSeverityFinal(policyLimit){
             const LimitedAverageSeverityFinal = data.reduce((sum, item) => {
-=======
 
         function LimitedAvergaeSeverity(){
             const LimitedAvergaeSeverity = data.reduce((sum, item) => {
->>>>>>> parent of 7c25921 (Finished Project)
                 let productSum = 0;
                 for (let i = 1; i <= 12; i++) {
                     const mean = parseFloat(String(item[`Mean${i}`]).replace(',', '.'));
@@ -228,7 +182,6 @@
                 }
                 return sum + productSum;
                 }, 0);
-<<<<<<< HEAD
             return LimitedAverageSeverityFinal.toFixed(0);
         }
 
@@ -253,12 +206,8 @@
         function processSeverity(alphaK1, alphaK2, alphaK3){
             result = 2*dataNbara*dataRisk_parm*((alphaK1*averageAlphaArray1+4*alphaK2*averageAlphaArray2+alphaK3*averageAlphaArray3)/6-(alphaK1+4*alphaK2+alphaK3)/6*ghLas)
             return result * 0.0000001;
-=======
->>>>>>> parent of 7c25921 (Finished Project)
         }
 
-<<<<<<< HEAD
-<<<<<<< HEAD
 
 %>
 
@@ -278,14 +227,8 @@
 
     <%- include('form') %>
     <% if (data.length > 0) { %>
-<<<<<<< HEAD
         <%- include('filteredData') %>
         <%- include('backupCalcs', {unlimitedValues: unlimitedValues, alphaValue1:alphaValue1, alphaValue2:alphaValue2, alphaValue3:alphaValue3, unlimitedValuesV2:unlimitedValuesV2 }) %>
-=======
-=======
-=======
->>>>>>> parent of 3f9e16e (Last point before Optimalization)
-    %>
 
     <form action="/filter" method="post" id="filterForm">
         <label for="lob">Select LOB:</label>
@@ -309,10 +252,6 @@
 
     <h2>Filtered Data</h2>
     <% if (data.length > 0) { %>
-<<<<<<< HEAD
->>>>>>> parent of 3f9e16e (Last point before Optimalization)
-=======
->>>>>>> parent of 3f9e16e (Last point before Optimalization)
         <table>
             <thead>
                 <tr>
@@ -331,43 +270,6 @@
                 <% }); %>
             </tbody>
         </table>
-<<<<<<< HEAD
-<<<<<<< HEAD
-
-        <h2>Mild Calcs</h2>
-        <table>
-            <thead>
-                <tr>
-                    <th>Policy limit</th>
-                    <th>Limited Avergae Severity</th>
-                    <th>ALAE per Occurence</th>
-                    <th>ULAE per Occurence</th>
-                    <th>Without Risk Load</th>
-                    <th>Process Risk Load</th>
-                    <th>Parameter Risk Load</th>
-                    <th>ILF With Risk Load</th>
-                </tr>
-            </thead>
-            <tbody>
-                <% for (let i = 0; i < policyLimits.length; i++) { %>
-                    <tr>
-                        <td><%= policyLimits[i] %></td>
-                        <td><%= data[i] ? data[i].ALAE * data[i].nbarc : '' %></td>
-                        <td><%= data[0].ALAE %></td>
-                        <td></td>
-                        <td></td>
-                        <td><%= FinalRiskLoadAmounts(policyLimits[i]*1000).toFixed(0) %></td>
-                        <td></td>
-                        <td></td>
-                    </tr>
-                <% } %>
-            </tbody>
-        </table>
-
-=======
->>>>>>> parent of 3f9e16e (Last point before Optimalization)
-=======
->>>>>>> parent of 3f9e16e (Last point before Optimalization)
         <h2>Backup Calcs</h2>
         <table>
             <thead>
@@ -397,21 +299,9 @@
                 </tr>
             </tbody>
         </table>
->>>>>>> parent of 7c25921 (Finished Project)
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-        <!-- Backup Calcs V2 Display: none -->
-        <h2 class="developer-table">Backup Calcs V2</h2>
-        <table class="developer-table">
-=======
         <h2>Backup Calcs V2</h2>
         <table>
->>>>>>> parent of 3f9e16e (Last point before Optimalization)
-=======
-        <h2>Backup Calcs V2</h2>
-        <table>
->>>>>>> parent of 3f9e16e (Last point before Optimalization)
             <thead>
                 <tr>
                     <th>Policy Limit</th>
@@ -428,32 +318,7 @@
                 </tr>
             </thead>
             <tbody>
-<<<<<<< HEAD
-                <% 
-                    var averageBLLW = 0;
-                    policyLimitsV2.forEach(function(limit, index) { 
-                        
-
-                    const BLLW = parseFloat(String(data[0][Object.keys(data[0])[index + 15]]).replace(',', '.'));  
-                    BLLWArray.push(BLLW);
-                    averageBLLW += BLLW;
-                    
-                    //
-                    alphaK1 = LimitedAverageSeverity(alphaValue1, unlimitedValues * alphaValue1, limit)
-                    alphaK2 = LimitedAverageSeverity(alphaValue2, unlimitedValues * alphaValue2, limit)
-                    alphaK3 = LimitedAverageSeverity(alphaValue3, unlimitedValues * alphaValue3, limit)
-
-                    // Pushing values to arrays to use it in main calculations
-                    alphaArray1.push(alphaK1)
-                    alphaArray2.push(alphaK2)
-                    alphaArray3.push(alphaK3)
-
-                    processRiskArray.push(processRisk(alphaK1, alphaK2, alphaK3))
-                    processSeverityArray.push(processSeverity(alphaK1, alphaK2, alphaK3))
-                        %>
-=======
                 <% policyLimitsV2.forEach(function(limit, index) { %>
->>>>>>> parent of 7c25921 (Finished Project)
                     <tr>
                         <td><%= limit %></td>
                         <td><%= data[0][Object.keys(data[0])[index + 15]] %></td>
@@ -468,20 +333,11 @@
                 <% }); %>
             </tbody>
         </table>
-<<<<<<< HEAD
-<<<<<<< HEAD
-<<<<<<< HEAD
         %>
         <h2 class="developer-table">Average Calcs</h2>
         <table class="developer-table">
-=======
         <h2>Average Calcs</h2>
         <table>
->>>>>>> parent of 3f9e16e (Last point before Optimalization)
-=======
-        <h2>Average Calcs</h2>
-        <table>
->>>>>>> parent of 3f9e16e (Last point before Optimalization)
             <thead>
                 <tr>
                     <td>Average BLLW</td>
@@ -503,16 +359,7 @@
             </tbody>
             
         </table>
-<<<<<<< HEAD
-<<<<<<< HEAD
-        %>
-        <!-- Main Calcs -->
-=======
         <h2>Mild Calcs</h2>
->>>>>>> parent of 3f9e16e (Last point before Optimalization)
-=======
-        <h2>Mild Calcs</h2>
->>>>>>> parent of 3f9e16e (Last point before Optimalization)
         <table>
             <thead>
                 <tr>
@@ -581,8 +428,6 @@
         </script>
 
     
-=======
->>>>>>> parent of 7c25921 (Finished Project)
     <% } else { %>
         <p>No data available</p>
     <% } %>
