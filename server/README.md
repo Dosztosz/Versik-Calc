@@ -23,7 +23,7 @@ node-server-project
 
 1. Navigate to the project directory:
    ```
-   cd mild_calc
+   cd server
    ```
 
 2. Install the dependencies:
@@ -35,7 +35,3 @@ node-server-project
    ```
    node src/server.js
    ```
-
-## License
-
-This project is licensed under the MIT License.
