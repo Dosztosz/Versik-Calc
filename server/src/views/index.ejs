@@ -8,10 +8,15 @@
     processSeverityArray = [];
 
     var averageBLLW = 0;
+    var BLLW = 0;
     
+    // Static data
+    const policyLimits = [100, 200, 250, 300, 500, 750, 1000, 1500, 2000, 2500, 3000, 4000, 5000, 10000];
+    const policyLimitsV2 = [100000, 200000, 250000, 300000, 500000, 750000, 1000000, 1500000, 2000000, 2500000, 3000000, 4000000, 5000000, 10000000];
+
 
     //Important starting functions
-
+        
     const unlimitedValues = data.reduce((sum, item) => {
             let productSum = 0;
             for (let i = 1; i <= 12; i++) {
@@ -24,25 +29,27 @@
             return sum + productSum;
         }, 0);
 
-    // Static data
-    const policyLimits = [100, 200, 250, 300, 500, 750, 1000, 1500, 2000, 2500, 3000, 4000, 5000, 10000];
-    const policyLimitsV2 = [100000, 200000, 250000, 300000, 500000, 750000, 1000000, 1500000, 2000000, 2500000, 3000000, 4000000, 5000000, 10000000];
+    
 
     const alphaValue1 = data[0] && !isNaN(parseFloat(data[0].a)) ? (1 - Math.sqrt(parseFloat((data[0].a).replace(',', '.')) * 3)) : 'N/A';
     const alphaValue2 = 1;
     const alphaValue3 = data[0] && !isNaN(parseFloat(data[0].a)) ? (1 + Math.sqrt(parseFloat((data[0].a).replace(',', '.')) * 3)) : 'N/A';
 
 
-    policyLimitsV2.forEach(function(limit, index) { 
-
-
-        const BLLW = parseFloat(String(data[0][Object.keys(data[0])[index + 15]]).replace(',', '.'));  
-        BLLWArray.push(BLLW);  //Dodane toFixed(0)
-        averageBLLW += BLLW;
-        alphaArray1.push(LimitedAverageSeverity(alphaValue1, unlimitedValues * alphaValue1, limit))
-        alphaArray2.push(LimitedAverageSeverity(alphaValue2, unlimitedValues * alphaValue2, limit))
-        alphaArray3.push(LimitedAverageSeverity(alphaValue3, unlimitedValues * alphaValue3, limit))
-    })
+    if(data[0] !== undefined){
+        policyLimitsV2.forEach(function(limit, index) { 
+            const key = Object.keys(data[0])[index + 15];
+            if (data[0][key] !== undefined) {
+                    BLLW = parseFloat(String(data[0][key]).replace(',', '.'));
+                    BLLWArray.push(BLLW);
+                    averageBLLW += BLLW;
+                    alphaArray1.push(LimitedAverageSeverity(alphaValue1, unlimitedValues * alphaValue1, limit));
+                    alphaArray2.push(LimitedAverageSeverity(alphaValue2, unlimitedValues * alphaValue2, limit));
+                    alphaArray3.push(LimitedAverageSeverity(alphaValue3, unlimitedValues * alphaValue3, limit));
+                } 
+            })
+        }
+    
 
 
     averageAlphaArray1 = parseFloat(CalculateAverage(alphaArray1).toFixed(0)) 
